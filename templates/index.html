@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网络设备扫描器</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>网络设备扫描器</h1>
+            <div class="scan-box">
+                <div class="input-group">
+                    <input type="text" 
+                           id="networkSegment" 
+                           placeholder="输入网段 (例如: 192.168.1.0/24)"
+                           onkeypress="handleKeyPress(event)">
+                    <button onclick="startScan()" class="scan-btn">
+                        <span class="btn-text">开始扫描</span>
+                        <div class="scan-animation"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-container">
+            <h2>扫描结果</h2>
+            <div class="table-container">
+                <table id="deviceTable">
+                    <thead>
+                        <tr>
+                            <th>主机名</th>
+                            <th>IP地址</th>
+                            <th>MAC地址</th>
+                            <th>扫描时间</th>
+                            <th>网段</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

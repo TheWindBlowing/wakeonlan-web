@@ -1,0 +1,226 @@
+:root {
+    --primary-color: #00a8ff;
+    --secondary-color: #192a56;
+    --background-color: #f5f6fa;
+    --text-color: #2f3640;
+    --border-color: #dcdde1;
+    --hover-color: #0097e6;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-color);
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    color: var(--secondary-color);
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.scan-box {
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+input {
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    width: 300px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0,168,255,0.2);
+}
+
+.scan-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.scan-btn:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-2px);
+}
+
+.scan-animation {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    display: none;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.scanning .scan-animation {
+    display: block;
+}
+
+.scanning .btn-text {
+    display: none;
+}
+
+.results-container {
+    margin-top: 30px;
+}
+
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--secondary-color);
+    color: white;
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: rgba(0,168,255,0.05);
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .input-group {
+        flex-direction: column;
+    }
+    
+    input {
+        width: 100%;
+    }
+    
+    .scan-btn {
+        width: 100%;
+        justify-content: center;
+    }
+} 
+
+.sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 25px !important;
+}
+
+.sort-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.arrow {
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 3px;
+    opacity: 0.3;
+}
+
+.up {
+    transform: rotate(-135deg);
+    margin-bottom: 3px;
+}
+
+.down {
+    transform: rotate(45deg);
+}
+
+.sort-asc .sort-icon .up,
+.sort-desc .sort-icon .down {
+    opacity: 1;
+}
+
+.sortable:hover {
+    background-color: var(--secondary-color-dark, #121f40);
+}
+
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: rgba(0,168,255,0.1);
+    transform: translateX(5px);
+    transition: all 0.2s ease;
+} 
