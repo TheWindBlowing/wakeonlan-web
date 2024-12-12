@@ -2,7 +2,7 @@
 ###
  # @Author: Zhiwei Tao zwtao21@163.com
  # @Date: 2024-12-13 01:52:40
- # @LastEditTime: 2024-12-13 02:38:13
+ # @LastEditTime: 2024-12-13 02:54:29
  # @LastEditors: Zhiwei Tao zwtao21@163.com
  # @FilePath: /wakeOnLan/deploy.sh
  # @Description: 
