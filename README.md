@@ -1,7 +1,7 @@
 <!--
  * @Author: Zhiwei Tao zwtao21@163.com
  * @Date: 2024-12-13 02:54:25
- * @LastEditTime: 2024-12-13 03:03:37
+ * @LastEditTime: 2024-12-13 03:05:03
  * @LastEditors: Zhiwei Tao zwtao21@163.com
  * @FilePath: /wakeOnLan/README.md
  * @Description: 
@@ -51,7 +51,7 @@
 
 1. 克隆仓库
 ```bash
-git remote add origin https://github.com/TheWindBlowing/wakeonlan-web.git
+git clone https://github.com/TheWindBlowing/wakeonlan-web.git
 cd wakeonlan-web
 ```
 
