@@ -1,7 +1,7 @@
 '''
 Author: Zhiwei Tao zwtao21@163.com
 Date: 2024-12-13 01:03:41
-LastEditTime: 2024-12-13 01:58:23
+LastEditTime: 2024-12-13 02:12:41
 LastEditors: Zhiwei Tao zwtao21@163.com
 FilePath: /wakeOnLan/app.py
 Description: 
@@ -18,57 +18,82 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 import sys
+import configparser
+import platform
 
-# 配置日志
-def setup_logger():
-    # 创建 logs 目录（如果不存在）
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
+def load_config():
+    """加载配置文件"""
+    config = configparser.ConfigParser()
+    try:
+        config_paths = [
+            'config.ini',  # 当前目录
+            '/etc/wakeonlan/config.ini',  # 系统配置目录
+            '/home/tzw/app/wakeOnLan/config.ini'  # 应用目录
+        ]
+        found = config.read(config_paths)
+        if not found:
+            raise Exception(f"未找到配置文件，尝试的路径: {config_paths}")
+        return config
+    except Exception as e:
+        raise Exception(f"加载配置文件失败: {str(e)}")
+
+def get_platform_interfaces(config):
+    """根据平台获取网络接口列表"""
+    system = config.get('Platform', 'system', fallback=platform.system().lower())
+    if system == 'linux':
+        interfaces = config.get('Platform', 'linux_interfaces').split(',')
+    elif system == 'mac':
+        interfaces = config.get('Platform', 'mac_interfaces').split(',')
+    elif system == 'windows':
+        interfaces = config.get('Platform', 'windows_interfaces').split(',')
+    else:
+        raise ValueError(f"不支持的平台: {system}")
     
-    # 配置日志格式
+    return [iface.strip().strip('"') for iface in interfaces]
+
+def setup_logger(config):
+    """根据配置设置日志记录器"""
+    log_path = config.get('Logging', 'log_path', fallback='logs/app.log')
+    log_level = config.get('Logging', 'log_level', fallback='INFO')
+    max_bytes = config.getint('Logging', 'max_bytes', fallback=1024*1024)
+    backup_count = config.getint('Logging', 'backup_count', fallback=5)
+    
+    # 创建日志目录
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    
     formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     
-    # 文件处理器 - 按大小轮转
     file_handler = RotatingFileHandler(
-        'logs/app.log',
-        maxBytes=1024 * 1024,  # 1MB
-        backupCount=5,
+        log_path,
+        maxBytes=max_bytes,
+        backupCount=backup_count,
         encoding='utf-8'
     )
     file_handler.setFormatter(formatter)
     
-    # 控制台处理器
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
     
-    # 获取根日志记录器
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    
-    # 清除现有的处理器
+    logger.setLevel(getattr(logging, log_level.upper()))
     logger.handlers.clear()
-    
-    # 添加处理器
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
     
     return logger
-
-# 创建日志记录器
-logger = setup_logger()
 
 app = Flask(__name__, 
     static_folder='static',
     template_folder='templates'
 )
 
-def init_db():
+def init_db(db_path='network_devices.db'):
     logger.info("初始化数据库")
     try:
-        conn = sqlite3.connect('network_devices.db')
+        conn = sqlite3.connect(db_path)
         c = conn.cursor()
         
         # 先删除旧表（如果存在）
@@ -101,33 +126,31 @@ def scan_network(network_segment):
         if '/' not in network_segment:
             raise ValueError("网段格式错误，需要使用 CIDR 格式（例如：192.168.1.0/24）")
 
-        # 获取所有可用的网络接口
+        # 获取所有可用的络接口
         from scapy.arch import get_if_list
         
-        # Linux 系统常用接口
-        interfaces = get_if_list()
-        logger.info(f"可用网络接口: {interfaces}")
-        
-        # Linux 优先使用的接口顺序
-        linux_interfaces = ['eth0', 'ens33', 'enp0s3', 'wlan0', 'wlp2s0']
-        iface = None
+        # 获取当前平台的网络接口列表
+        platform_interfaces = get_platform_interfaces(config)
+        available_interfaces = get_if_list()
+        logger.info(f"可用网络接口: {available_interfaces}")
         
         # 查找第一个可用的接口
-        for interface in linux_interfaces:
-            if interface in interfaces:
+        iface = None
+        for interface in platform_interfaces:
+            if interface in available_interfaces:
                 iface = interface
                 break
         
         # 如果没有找到常用接口，使用第一个可用接口
-        if not iface and interfaces:
-            iface = interfaces[0]
+        if not iface and available_interfaces:
+            iface = available_interfaces[0]
             
         if not iface:
             raise Exception("未找到可用的网络接口")
 
         logger.info(f"使用网络接口: {iface}")
         
-        # 直接使用 CIDR 格式进行扫描
+        # 直��使用 CIDR 格式进行扫描
         arp = ARP(pdst=network_segment)
         ether = Ether(dst="ff:ff:ff:ff:ff:ff")
         packet = ether/arp
@@ -199,7 +222,7 @@ def ping_scan(network_segment):
                     'mac_address': mac
                 })
         except Exception as e:
-            logger.error(f"Ping扫描错误 {ip}: {str(e)}")
+            logger.error(f"Ping扫描误 {ip}: {str(e)}")
             continue
     
     return devices
@@ -264,7 +287,7 @@ def scan():
                         datetime.datetime.now(),
                         network_segment
                     ))
-                    logger.info(f"��加新设备: {device['mac_address']}")
+                    logger.info(f"加新设备: {device['mac_address']}")
                 else:
                     logger.info(f"更新设备信息: {device['mac_address']}")
                     
@@ -304,7 +327,7 @@ def get_history():
             })
         
         conn.close()
-        logger.info(f"返回 {len(devices)} ��历史记录")
+        logger.info(f"返回 {len(devices)} 历史记录")
         return jsonify(devices)
     except Exception as e:
         logger.error(f"获取历史记录失败: {str(e)}")
@@ -332,12 +355,31 @@ def wake_device():
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
-    # 检查是否以 root 权限运行
-    if os.geteuid() != 0:
-        logger.error("此程序需要 root 权限才能运行")
-        print("请使用 sudo 运行此程序")
-        sys.exit(1)
+    try:
+        # 加载配置
+        config = load_config()
         
-    logger.info("启动应用程序")
-    init_db()
-    app.run(host='0.0.0.0', port=5100, debug=True)
+        # 设置日志
+        logger = setup_logger(config)
+        
+        # 检查是否以 root 权限运行
+        if os.geteuid() != 0:
+            logger.error("此程序需要 root 权限才能运行")
+            print("请使用 sudo 运行此程序")
+            sys.exit(1)
+        
+        # 初始化数据库
+        db_path = config.get('Database', 'path', fallback='network_devices.db')
+        init_db(db_path)
+        
+        # 启动应用
+        host = config.get('Server', 'host', fallback='0.0.0.0')
+        port = config.getint('Server', 'port', fallback=5100)
+        debug = config.getboolean('Server', 'debug', fallback=True)
+        
+        logger.info(f"启动应用程序 - 监听: {host}:{port}")
+        app.run(host=host, port=port, debug=debug)
+        
+    except Exception as e:
+        print(f"启动失败: {str(e)}")
+        sys.exit(1)
